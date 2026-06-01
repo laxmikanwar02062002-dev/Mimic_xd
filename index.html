@@ -2,106 +2,178 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIMIC AI Core</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MIMIC AI</title>
     <style>
-        body {
-            background-color: #0d0e12;
-            color: #f5f7fa;
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
+        * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-        .container {
-            width: 100%;
-            max-width: 500px;
-            border: 2px solid #00f2fe;
-            box-shadow: 0 0 15px #00f2fe;
-            border-radius: 8px;
-            background: #13161c;
+        body {
+            background-color: #000000;
+            color: #e3e3e3;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            height: 100vh;
             overflow: hidden;
         }
-        .header {
-            background: #00f2fe;
-            color: #0d0e12;
-            padding: 10px;
-            font-weight: bold;
-            text-align: center;
-            letter-spacing: 2px;
+        .chat-container {
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background-color: #000000;
+        }
+        .chat-header {
+            padding: 18px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #ffffff;
+            background-color: #000000;
+            border-bottom: 1px solid #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 0.5px;
+        }
+        .chat-header::before {
+            content: '';
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            background-color: #34a853;
+            border-radius: 50%;
         }
         .chat-box {
-            height: 300px;
-            padding: 15px;
+            flex: 1;
+            padding: 24px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            border-bottom: 1px solid #222230;
+            gap: 32px;
+            background-color: #000000;
+        }
+        .message-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            animation: fadeIn 0.25s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .message-wrapper.user {
+            align-items: flex-end;
+        }
+        .message-wrapper.ai {
+            align-items: flex-start;
+        }
+        .sender-name {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #ffffff;
+            letter-spacing: 0.3px;
         }
         .message {
-            max-width: 80%;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            line-height: 1.4;
+            max-width: 85%;
+            font-size: 15px;
+            line-height: 1.6;
+            word-wrap: break-word;
+            white-space: pre-line;
         }
-        .user-msg {
-            background: #222230;
-            color: #f5f7fa;
-            align-self: flex-end;
-            border: 1px solid #8a8a9e;
+        .user .message {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            padding: 12px 18px;
+            border-radius: 20px 20px 4px 20px;
+            border: 1px solid #262626;
         }
-        .ai-msg {
-            background: rgba(0, 242, 254, 0.1);
-            color: #00f2fe;
-            align-self: flex-start;
-            border: 1px solid #00f2fe;
+        .ai .message {
+            background-color: transparent;
+            color: #e3e3e3;
+            padding: 0;
+            border-radius: 0;
         }
-        .input-area {
+        .input-container {
+            padding: 16px 24px 24px 24px;
+            background-color: #000000;
+        }
+        .input-wrapper {
             display: flex;
-            padding: 10px;
-            background: #0d0e12;
+            background-color: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 28px;
+            padding: 4px 8px 4px 20px;
+            align-items: center;
+            min-height: 52px;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+        .input-wrapper:focus-within {
+            border-color: #404040;
+            background-color: #111111;
         }
         input {
             flex: 1;
-            background: #13161c;
-            border: 1px solid #222230;
-            color: #f5f7fa;
-            padding: 10px;
-            border-radius: 4px;
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-size: 16px;
+            padding: 10px 0;
             outline: none;
         }
-        input:focus {
-            border-color: #00f2fe;
+        input::placeholder {
+            color: #666666;
         }
         button {
-            background: #00f2fe;
-            color: #0d0e12;
+            background: transparent;
             border: none;
-            padding: 0 15px;
-            margin-left: 8px;
-            border-radius: 4px;
-            font-weight: bold;
+            color: #ffffff;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, color 0.2s;
+            flex-shrink: 0;
+        }
+        button:active {
+            background-color: #1a1a1a;
+        }
+        button svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="header">⚡ MIMIC AI CORE V1.0 ⚡</div>
+    <div class="chat-container">
+        <div class="chat-header">MIMIC v1.0</div>
+        
         <div class="chat-box" id="chatBox">
-            <div class="message ai-msg">MIMIC Core Active. Three-Dimensional Intellect online. Ask me anything.</div>
+            <div class="message-wrapper ai">
+                <div class="sender-name">MIMIC AI</div>
+                <div class="message">Hello! I am MIMIC, your AI companion. How can I help you build or create today?</div>
+            </div>
         </div>
-        <div class="input-area">
-            <input type="text" id="userInput" placeholder="Type a command or question...">
-            <button onclick="sendMessage()">SEND</button>
+        
+        <div class="input-container">
+            <div class="input-wrapper">
+                <input type="text" id="userInput" placeholder="Ask MIMIC..." autocomplete="off">
+                <button onclick="sendMessage()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+                    </svg>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -113,39 +185,45 @@
             
             if (text === '') return;
 
-            // User Message
-            const userDiv = document.createElement('div');
-            userDiv.className = 'message user-msg';
-            userDiv.innerText = text;
-            chatBox.appendChild(userDiv);
+            // User Message Template
+            const userWrapper = document.createElement('div');
+            userWrapper.className = 'message-wrapper user';
+            userWrapper.innerHTML = `
+                <div class="sender-name">You</div>
+                <div class="message"></div>
+            `;
+            userWrapper.querySelector('.message').innerText = text;
+            chatBox.appendChild(userWrapper);
             
             input.value = '';
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // Simulated AI Response logic
+            // AI Response Template
             setTimeout(() => {
-                const aiDiv = document.createElement('div');
-                aiDiv.className = 'message ai-msg';
+                const aiWrapper = document.createElement('div');
+                aiWrapper.className = 'message-wrapper ai';
                 
-                let response = "Analyzing data stream... Command not recognized in basic shell matrix.";
-                
-                // Custom quick-responses you can play with!
+                let response = "I've processed your prompt. Currently, my responses are running inside a standalone interface matrix.";
                 const lowerText = text.toLowerCase();
+                
                 if (lowerText.includes('hello') || lowerText.includes('hi')) {
-                    response = "Greetings. I am MIMIC AI, your localized 3D Intellect engine.";
+                    response = "Hi there! I'm online and ready to assist you.";
                 } else if (lowerText.includes('who made you')) {
                     response = "I was deployed into reality by Laxmi Kanwar Rathore.";
                 } else if (lowerText.includes('status')) {
-                    response = "All systems operational. Memory grids stable. Core core temperatures optimal.";
+                    response = "System Core: Operational\nMemory Grid: Active\nEnvironment: GitHub Pages Stable.";
                 }
                 
-                aiDiv.innerText = response;
-                chatBox.appendChild(aiDiv);
+                aiWrapper.innerHTML = `
+                    <div class="sender-name">MIMIC AI</div>
+                    <div class="message"></div>
+                `;
+                aiWrapper.querySelector('.message').innerText = response;
+                chatBox.appendChild(aiWrapper);
                 chatBox.scrollTop = chatBox.scrollHeight;
-            }, 600);
+            }, 650);
         }
 
-        // Allow pressing Enter key to send
         document.getElementById('userInput').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 sendMessage();
