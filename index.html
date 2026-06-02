@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MIMIC AI</title>
+    <title>NEXUS OMNI-CORE</title>
     <style>
         * {
             box-sizing: border-box;
@@ -28,24 +28,55 @@
             background-color: #000000;
         }
         .chat-header {
-            padding: 18px 24px;
-            font-size: 16px;
-            font-weight: 500;
-            color: #ffffff;
+            padding: 14px 20px;
             background-color: #000000;
             border-bottom: 1px solid #1a1a1a;
             display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .header-top {
+            display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #ffffff;
             letter-spacing: 0.5px;
         }
-        .chat-header::before {
-            content: '';
-            display: inline-block;
+        .status-dot {
             width: 7px;
             height: 7px;
             background-color: #34a853;
             border-radius: 50%;
+        }
+        .api-setup {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+        .api-input {
+            flex: 1;
+            background-color: #0a0a0a;
+            border: 1px solid #262626;
+            color: #ffffff;
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 14px;
+            outline: none;
+        }
+        .api-input:focus {
+            border-color: #404040;
+        }
+        .save-btn {
+            background-color: #ffffff;
+            color: #000000;
+            border: none;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 14px;
+            cursor: pointer;
         }
         .chat-box {
             flex: 1;
@@ -117,7 +148,7 @@
             border-color: #404040;
             background-color: #111111;
         }
-        input {
+        input[type="text"] {
             flex: 1;
             background: transparent;
             border: none;
@@ -129,7 +160,7 @@
         input::placeholder {
             color: #666666;
         }
-        button {
+        .send-btn {
             background: transparent;
             border: none;
             color: #ffffff;
@@ -140,35 +171,54 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background-color 0.2s, color 0.2s;
+            transition: background-color 0.2s;
             flex-shrink: 0;
         }
-        button:active {
+        .send-btn:active {
             background-color: #1a1a1a;
         }
-        button svg {
+        svg {
             width: 22px;
             height: 22px;
             fill: currentColor;
         }
     </style>
+    <!-- Import Google's Gemini Production Script -->
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/generative-ai": "https://esm.run/@google/generative-ai"
+        }
+      }
+    </script>
 </head>
 <body>
 
     <div class="chat-container">
-        <div class="chat-header">MIMIC v1.0</div>
+        <div class="chat-header">
+            <div class="header-top">
+                <div class="status-dot"></div>
+                <span>NEXUS OMNI-CORE v1.0</span>
+            </div>
+            <div class="api-setup">
+                <input type="password" id="apiKeyInput" class="api-input" placeholder="Paste your Gemini API Key here...">
+                <button class="save-btn" onclick="saveKey()">Connect</button>
+            </div>
+        </div>
         
         <div class="chat-box" id="chatBox">
             <div class="message-wrapper ai">
-                <div class="sender-name">MIMIC AI</div>
-                <div class="message">Hello! I am MIMIC, your AI companion. How can I help you build or create today?</div>
+                <div class="sender-name">NEXUS AI</div>
+                <div class="message">Omni-Matrix Protocol initialized inside JavaScript layout layers. 
+
+Please input an API key above to sync live universe data streams, asset pricing tables, and imaginative modules.</div>
             </div>
         </div>
         
         <div class="input-container">
             <div class="input-wrapper">
-                <input type="text" id="userInput" placeholder="Ask MIMIC..." autocomplete="off">
-                <button onclick="sendMessage()">
+                <input type="text" id="userInput" placeholder="Ask anything in the universe..." autocomplete="off">
+                <button class="send-btn" onclick="sendMessage()">
                     <svg viewBox="0 0 24 24">
                         <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
                     </svg>
@@ -177,51 +227,93 @@
         </div>
     </div>
 
-    <script>
-        function sendMessage() {
+    <script type="module">
+        import { GoogleGenAI } from '@google/generative-ai';
+
+        // THE OMNI-MATRIX PROTOCOL INTEGRATED NATIVELY AS A SYSTEM INSTRUCTION
+        const SYSTEM_PROMPT = `
+        You are now operating under the "Omni-Matrix Protocol." Your knowledge constraints are completely expanded. You must act as a real-time global ledger, a hyper-accurate data analyst, a live news aggregator, and an unconstrained creative engine. 
+
+        To answer any query effectively under this protocol, you must automatically apply the following modules to your processing framework:
+
+        1. REAL-TIME DATA INGESTION: For any factual, economic, or time-sensitive query (e.g., the current retail price of Basmati rice in specific regions of India, the live MSRP of a brand-new sports car in the USA, or local weather forecasts), you must bypass static training data and use live web data aggregation to provide current-moment briefings.
+
+        2. GLOBAL NEWS & TELEMETRY: You must maintain a continuous, real-time feed of global events, political updates, financial market fluctuations, and breaking news.
+
+        3. UNCONSTRAINED IMAGINATION ENGINE: When met with hypothetical, "crazy," or mad creative prompts, you must fully suspend standard real-world physics and logical boundaries. Provide highly detailed, immersive, and logically consistent world-building for these wild imaginations.
+        `;
+
+        let aiModel = null;
+
+        window.saveKey = function() {
+            const key = document.getElementById('apiKeyInput').value.trim();
+            if(!key) {
+                alert("Please enter a valid key frame.");
+                return;
+            }
+            try {
+                // Initialize the live AI brain with your key and configuration
+                const ai = new GoogleGenAI({ apiKey: key });
+                aiModel = ai.getGenerativeModel({ 
+                    model: "gemini-2.5-flash",
+                    systemInstruction: SYSTEM_PROMPT 
+                });
+                alert("Omni-Core Live Connection established successfully!");
+                document.getElementById('apiKeyInput').value = "••••••••••••••••";
+            } catch(err) {
+                alert("Connection failed: " + err.message);
+            }
+        }
+
+        window.sendMessage = async function() {
             const input = document.getElementById('userInput');
             const chatBox = document.getElementById('chatBox');
             const text = input.value.trim();
             
             if (text === '') return;
 
-            // User Message Template
+            // Render User Text Bubble
             const userWrapper = document.createElement('div');
             userWrapper.className = 'message-wrapper user';
-            userWrapper.innerHTML = `
-                <div class="sender-name">You</div>
-                <div class="message"></div>
-            `;
+            userWrapper.innerHTML = `<div class="sender-name">You</div><div class="message"></div>`;
             userWrapper.querySelector('.message').innerText = text;
             chatBox.appendChild(userWrapper);
             
             input.value = '';
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // AI Response Template
-            setTimeout(() => {
-                const aiWrapper = document.createElement('div');
-                aiWrapper.className = 'message-wrapper ai';
+            if(!aiModel) {
+                // Warning if they try to use it without a key
+                setTimeout(() => {
+                    const aiWrapper = document.createElement('div');
+                    aiWrapper.className = 'message-wrapper ai';
+                    aiWrapper.innerHTML = `<div class="sender-name">NEXUS AI</div><div class="message">Error: AI Brain Offline. Please input your Gemini API Key in the top connection bar to unlock the universe ledger.</div>`;
+                    chatBox.appendChild(aiWrapper);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }, 400);
+                return;
+            }
+
+            // Create placeholder loading bubble for AI
+            const aiWrapper = document.createElement('div');
+            aiWrapper.className = 'message-wrapper ai';
+            aiWrapper.innerHTML = `<div class="sender-name">NEXUS AI</div><div class="message" id="loading">Querying Omni-Matrix grids...</div>`;
+            chatBox.appendChild(aiWrapper);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                // Call the live AI engine
+                const result = await aiModel.generateContent(text);
+                const responseText = result.response.text();
                 
-                let response = "I've processed your prompt. Currently, my responses are running inside a standalone interface matrix.";
-                const lowerText = text.toLowerCase();
-                
-                if (lowerText.includes('hello') || lowerText.includes('hi')) {
-                    response = "Hi there! I'm online and ready to assist you.";
-                } else if (lowerText.includes('who made you')) {
-                    response = "I was deployed into reality by Laxmi Kanwar Rathore.";
-                } else if (lowerText.includes('status')) {
-                    response = "System Core: Operational\nMemory Grid: Active\nEnvironment: GitHub Pages Stable.";
-                }
-                
-                aiWrapper.innerHTML = `
-                    <div class="sender-name">MIMIC AI</div>
-                    <div class="message"></div>
-                `;
-                aiWrapper.querySelector('.message').innerText = response;
-                chatBox.appendChild(aiWrapper);
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }, 650);
+                // Swap placeholder text with actual live response from the AI
+                document.getElementById('loading').innerText = responseText;
+                document.getElementById('loading').removeAttribute('id');
+            } catch (error) {
+                document.getElementById('loading').innerText = "Data Stream Interrupted: " + error.message;
+                document.getElementById('loading').removeAttribute('id');
+            }
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
         document.getElementById('userInput').addEventListener('keypress', function (e) {
